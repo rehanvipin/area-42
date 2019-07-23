@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes as rand
 from Crypto.Util.Padding import pad, unpad
+from Crypto.Hash import SHA256
 
 class Cipher(object):
     """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted"""
@@ -17,21 +18,38 @@ class Cipher(object):
 
 
     def encrypt(self):
-        """Encrypts the file and returns the nonce, ciphertext and tag"""
-        pass
+        """Encrypts the file and returns the key"""
+        data = pad(self.file.read(), 16)
+        key = rand(16)
+        enc = AES.new(key, AES.MODE_GCM)
+        ct, tag = enc.encrypt_and_digest(data)
+        nonce = enc.nonce
+        body = nonce + tag + ct
+        hsh, bsh = self.shahash(body)
+        with open(hsh+'.lckd','wb') as wir:
+            wir.write(bsh + body)
+        return key
 
-    def decrypt(self):
+
+    def decrypt(self, key):
         """Decrypts the file and returns the plaintext"""
-        pass
+        
 
-    def hash(self, inp):
-        """Gets the SHA256 hash of the input object"""
-        pass
+
+    def shahash(self, inp, hexd = False):
+        """Returns the SHA256 hash of the input object"""
+        ob = SHA256.new()
+        ob.update(inp)
+        return ob.hexdigest(), ob.digest()
 
 
 if __name__ == "__main__":
 
-    with open('test.txt','rb') as red:
-        ob = Cipher(red)
+    red = open('test.txt','rb')
+    ob = Cipher(red)
+    ob.encrypt()
+
+    red.close()
+
 
     print("Succesful")
