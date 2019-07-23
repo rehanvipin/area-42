@@ -19,23 +19,37 @@ class Cipher(object):
 
     def encrypt(self):
         """Encrypts the file and returns the key"""
-        pass
+        data = pad(self.file.read(), 16)
+        key = rand(16)
+        enc = AES.new(key, AES.MODE_GCM)
+        ct, tag = enc.encrypt_and_digest(data)
+        nonce = enc.nonce
+        body = nonce + tag + ct
+        hsh, bsh = self.shahash(body)
+        with open(hsh+'.lckd','wb') as wir:
+            wir.write(bsh + body)
+        return key
+
 
     def decrypt(self, key):
         """Decrypts the file and returns the plaintext"""
-        pass
+        
 
-    def hash(self, inp, hexd = False):
+
+    def shahash(self, inp, hexd = False):
         """Returns the SHA256 hash of the input object"""
-       ob = SHA256.new()
-       ob.update(inp)
-
-       return ob.hexdigest() if hexd else ob.digest()
+        ob = SHA256.new()
+        ob.update(inp)
+        return ob.hexdigest(), ob.digest()
 
 
 if __name__ == "__main__":
 
-    with open('test.txt','rb') as red:
-        ob = Cipher(red)
+    red = open('test.txt','rb')
+    ob = Cipher(red)
+    ob.encrypt()
+
+    red.close()
+
 
     print("Succesful")

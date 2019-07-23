@@ -1,4 +1,5 @@
 # The virtual environment for pycrypto and others
 crypt/
 Activate.ps1
-test.txt
+*test*
+*.lckd

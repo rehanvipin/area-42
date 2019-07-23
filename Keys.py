@@ -16,8 +16,7 @@ class Key(object):
 
     def save(self):
         """Saves the keyfile to a temporary location before adding"""
-        fname = pad(bytes(self.fname), self.fname_len)
+        fname = pad(bytes(self.fname, 'utf8'), self.fname_len)
         with open(self.hash.decode(), 'wb') as wir:
             wir.write(self.key + self.hash + fname)
-
 
