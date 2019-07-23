@@ -1,5 +1,8 @@
 # The virtual environment for pycrypto and others
 crypt/
+__pycache__/
 Activate.ps1
 *test*
+*.bak
 *.lckd
+*.key

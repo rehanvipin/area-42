@@ -3,20 +3,53 @@ from Crypto.Util.Padding import pad, unpad
 class Key(object):
     """A single key, for encrypting or decrypting an Cipher object"""
 
-    def __init__(self, **kwargs):
-        try:
-            self.key = kwargs['key']
-            self.hash = kwargs['hash']
-            self.fname = kwargs['fname']
+    def __init__(self, fname, mode='e'):
+        """ fname is a sha256 hash, needs the .key extension """
+        if mode=='e':
+            self.key = b''
+            # bsh is the hash in bytes form hsh is in hex format
+            # hex format is used to name the keyfile, bsh is used to compare with 
+            # the ciphertext object for identification
+            self.bsh = b''
+            self.hsh = ''
+            # file is the name of the keyfile
+            self.file = fname+'.key'
+            # file_name is the original name of the big file
+            self.file_name = ''
+        elif mode=='d':
+            # while using decryption, entire filename is provided
+            self.load(fname)
 
-            self.fname_len = 64
-        except KeyError as k:
-            print(k)
-            exit()
 
-    def save(self):
-        """Saves the keyfile to a temporary location before adding"""
-        fname = pad(bytes(self.fname, 'utf8'), self.fname_len)
-        with open(self.hash.decode(), 'wb') as wir:
-            wir.write(self.key + self.hash + fname)
+    def load(self, fname):
+        """ Gets details from file and puts them in the object """
+        with open(fname, 'rb') as red:
+            payload = red.read()
+        self.key = payload[:16]
+        self.bsh = payload[16:48]
+        self.file_name = unpad(payload[48:],64).decode()
+        
 
+    def save(self, fname):
+        """ Given details, saves them to file in correct format"""
+        payload = b''
+        payload += self.key
+        payload += self.bsh
+        name = self.file_name.encode()
+        name = pad(name, 64)
+        payload += name
+        with open(fname, 'wb') as wir:
+            wir.write(payload)
+
+
+    def fix(self, key, bsh, hsh, file_name):
+        """ Utility function to quickly add the object's data """
+        self.key = key
+        self.bsh = bsh
+        self.hsh = hsh
+        self.file_name = file_name
+
+
+if __name__ == "__main__":
+    keyer = Key('test.key')
+    print('Successful')
