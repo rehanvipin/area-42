@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes as rand
 from Crypto.Util.Padding import pad, unpad
+from Crypto.Hash import SHA256
 
 class Cipher(object):
     """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted"""
@@ -17,16 +18,19 @@ class Cipher(object):
 
 
     def encrypt(self):
-        """Encrypts the file and returns the nonce, ciphertext and tag"""
+        """Encrypts the file and returns the key"""
         pass
 
-    def decrypt(self):
+    def decrypt(self, key):
         """Decrypts the file and returns the plaintext"""
         pass
 
-    def hash(self, inp):
-        """Gets the SHA256 hash of the input object"""
-        pass
+    def hash(self, inp, hexd = False):
+        """Returns the SHA256 hash of the input object"""
+       ob = SHA256.new()
+       ob.update(inp)
+
+       return ob.hexdigest() if hexd else ob.digest()
 
 
 if __name__ == "__main__":
