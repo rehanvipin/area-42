@@ -1,1 +1,1 @@
-File Encryption software with Authenticated Encryption and Key Managment.
+File Encryption software with Authenticated Encryption and Key Management.
