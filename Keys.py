@@ -1,10 +1,13 @@
 from Crypto.Util.Padding import pad, unpad
 
+import os
+
 class Key(object):
     """A single key, for encrypting or decrypting an Cipher object"""
 
-    def __init__(self, fname, mode='e'):
-        """ fname is a sha256 hash, needs the .key extension """
+    def __init__(self, fname=None, mode='e'):
+        """ fname is used to load data from the keyfile, only for decryption """
+        # mode e does nothing, only for description
         if mode=='e':
             self.key = b''
             # bsh is the hash in bytes form hsh is in hex format
@@ -12,14 +15,20 @@ class Key(object):
             # the ciphertext object for identification
             self.bsh = b''
             self.hsh = ''
-            # file is the name of the keyfile
-            self.file = fname+'.key'
             # file_name is the original name of the big file
             self.file_name = ''
         elif mode=='d':
             # while using decryption, entire filename is provided
-            self.load(fname)
+            if os.path.exists(os.curdir + '/' +fname):
+                self.load(fname)
+        #Else simply create the object, without any params
 
+    def __repr__(self):
+        try:
+            return f"key: {self.key} \nhash: {self.bsh} \nfilename: {self.file_name}"
+        except AttributeError as a:
+            print(a)
+            print("Fill in the object first")
 
     def load(self, fname):
         """ Gets details from file and puts them in the object """

@@ -9,7 +9,8 @@ class Cipher(object):
     """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted"""
 
     def __init__(self, file_object, func='e'):
-        """Use func to specify whether encrypting or decrypting"""
+        """Use func to specify whether encrypting or decrypting, expects an object\
+                pointing to the plaintext or the ciphertext"""
         assert file_object.readable(), "Cannot read the file"
 
         self.file = file_object
@@ -22,7 +23,7 @@ class Cipher(object):
 
 
     def encrypt(self):
-        """Encrypts the file and returns the key"""
+        """Encrypts the file Saves into lckd file and returns the key"""
         data = pad(self.file.read(), self.block_size)
         key = rand(self.key_size)
         enc = AES.new(key, AES.MODE_GCM)
@@ -33,27 +34,29 @@ class Cipher(object):
         with open(hsh+'.lckd','wb') as wir:
             wir.write(bsh + body)
 
-        # Creating the key object and saving the data to the file
-        key_obj = keys.Key(hsh)
+        # Creating the key object, doesn't save data to file
+        key_obj = keys.Key()
         key_obj.fix(key, bsh, hsh, self.file_name)
-        key_obj.save(key_obj.file)
 
         return key_obj
 
 
-    def decrypt(self, keyfile_name):
-        """Decrypts the file and returns the plaintext"""
-        key_obj = keys.Key(keyfile_name, 'd')
+    def decrypt(self, key_obj):
+        """Decrypts the file and returns the plaintext needs key object as param"""
         bsh = self.file.read(32)
         if bsh != key_obj.bsh:
-            print('Unable to decrypt')
+            raise ValueError('Incorrect Data')
 
         nonce = unpad(self.file.read(self.nonce_pad), self.nonce_pad)
         tag = unpad(self.file.read(self.tag_pad), self.tag_pad)
         ct = self.file.read()
 
         dec = AES.new(key_obj.key, AES.MODE_GCM, nonce=nonce)
-        data = dec.decrypt_and_verify(ct, tag)
+        try:
+            data = dec.decrypt_and_verify(ct, tag)
+        except ValueError as v:
+            print("Cannot decrypt, incorrect data")
+            return
         data = unpad(data, self.block_size)
 
         with open(key_obj.file_name, 'wb') as wir:
@@ -70,20 +73,28 @@ def test_encrypt(test_file):
     # Test for encryption
     red = open(test_file,'rb')
     ob = Cipher(red)
-    ob.encrypt()
-
-    red.close()
+    try:
+        kd = ob.encrypt()
+        kd.save('lmao.key')
+        print(kd)
+        print(type(kd))
+    finally:
+        red.close()
 
 def test_decrypt(test_file):
     # Test for decryption
     blu = open(test_file + '.lckd', 'rb')
     ob = Cipher(blu, 'd')
-    ob.decrypt(test_file + '.key')
-    blu.close()
+    try:
+        key_file_name = test_file + '.key'
+        key_obj = keys.Key(key_file_name, 'd')
+        ob.decrypt(key_obj)
+    finally:
+        blu.close()
 
 
 if __name__ == "__main__":
     """ Uncomment either one of the tests """
-    # test_encrypt('test.jpeg')
-    test_decrypt('xd')
+    # test_encrypt('test.txt')
+    test_decrypt('lmao')
     print("Succesful")
