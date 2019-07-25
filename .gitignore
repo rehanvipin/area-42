@@ -6,3 +6,4 @@ Activate.ps1
 *.bak
 *.lckd
 *.key
+*.kring
