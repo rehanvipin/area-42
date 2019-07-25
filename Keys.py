@@ -8,6 +8,7 @@ class Key(object):
     def __init__(self, fname=None, mode='e'):
         """ fname is used to load data from the keyfile, only for decryption """
         # mode e does nothing, only for description
+        self.filename_len = 64
         if mode=='e':
             self.key = b''
             # bsh is the hash in bytes form hsh is in hex format
@@ -34,9 +35,9 @@ class Key(object):
         """ Gets details from file and puts them in the object """
         with open(fname, 'rb') as red:
             payload = red.read()
-        self.key = payload[:16]
-        self.bsh = payload[16:48]
-        self.file_name = unpad(payload[48:],64).decode()
+        self.key = payload[:32]
+        self.bsh = payload[32:64]
+        self.file_name = unpad(payload[64:],self.filename_len).decode()
         
 
     def save(self, fname):
@@ -45,7 +46,7 @@ class Key(object):
         payload += self.key
         payload += self.bsh
         name = self.file_name.encode()
-        name = pad(name, 64)
+        name = pad(name, self.filename_len)
         payload += name
         with open(fname, 'wb') as wir:
             wir.write(payload)
@@ -61,4 +62,4 @@ class Key(object):
 
 if __name__ == "__main__":
     keyer = Key('test.key')
-    print('Successful')
+    print('Successful',keyer)

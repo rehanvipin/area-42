@@ -1,3 +1,5 @@
+import sys
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes as rand
 from Crypto.Util.Padding import pad, unpad
@@ -17,7 +19,7 @@ class Cipher(object):
         self.file_name = file_object.name
 
         self.block_size = 16
-        self.key_size = 16
+        self.key_size = 32
         self.nonce_pad = 32
         self.tag_pad = 32
 
@@ -75,9 +77,7 @@ def test_encrypt(test_file):
     ob = Cipher(red)
     try:
         kd = ob.encrypt()
-        kd.save('lmao.key')
-        print(kd)
-        print(type(kd))
+        kd.save(kd.hsh + '.key')
     finally:
         red.close()
 
@@ -95,6 +95,14 @@ def test_decrypt(test_file):
 
 if __name__ == "__main__":
     """ Uncomment either one of the tests """
-    # test_encrypt('test.txt')
-    test_decrypt('lmao')
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'e':
+            test_encrypt(sys.argv[2])
+        elif sys.argv[1] == 'd':
+            test_decrypt(sys.argv[2])
+        else:
+            print("Invalid argument")
+    else:
+        test_encrypt('test.txt')
+        # test_decrypt('lmao')
     print("Succesful")
