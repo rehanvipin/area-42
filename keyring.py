@@ -97,8 +97,12 @@ class Keyring(object):
         self.save()
 
 
-    def search_key(self):
-        pass
+    def search_key(self, bsh):
+        """Returns the key_obj correspoding to the bsh"""
+        if bsh in self.keys:
+            return self.keys[bsh]
+        else:
+            return None
 
     def import_key(self, key_obj):
         if not isinstance(key_obj, keys.Key):
