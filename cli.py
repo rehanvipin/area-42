@@ -4,6 +4,7 @@
 import argparse
 import os
 import json
+import getpass
 
 
 import cypher
@@ -28,6 +29,11 @@ def main():
         stats['used']  = 0
         with open('./temp_config.json' if parsed.temp else home_path, 'w') as wir:
             json.dump(stats, wir)
+    elif parsed.temp:
+        stats['kring'] = os.path.abspath(parsed.file) if os.path.exists(parsed.file) else print('Cannot file specified keyring file, set to None')
+        stats['used']  = 0
+        with open('./temp_config.json' if parsed.temp else home_path, 'w') as wir:
+            json.dump(stats, wir)
     elif not (os.path.exists(home_path) or os.path.exists('./temp_config.json')):
         raise ValueError("Specify the config file first, use -h option to know how to use")
     
@@ -39,8 +45,7 @@ def main():
             stats = json.load(red)
 
     kring = keyring.Keyring()
-    password = input("Enter your password(or a new one): ")
-    print("\r","*"*50)
+    password = getpass.getpass(prompt="Enter your password(or a new one): ", stream=None)
     #Making a new keyring for the user, if they choose to encrypt
     if parsed.encrypt and not stats['kring']:
         kring.create(password)
