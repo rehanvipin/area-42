@@ -1,9 +1,9 @@
-<h1>File Encryption software with Authenticated Encryption and Key Management.
+# File Encryption software with Authenticated Encryption(AEAD) and Key Management.
 
-Encrypts and Decrypts files using AES_GCM mode with 256 bit keys for Authenticated Encryption.
-Encrypts the keyfile using ChaCha20-Poly1305 with 256 bit keys derived from PBKDF2 for Authenticated Encryption.
+## Encrypts and Decrypts files using GCM, with AES-256 as block-cipher, for Authenticated Encryption.
+## Encrypts the keyring using ChaCha20-Poly1305 with 256 bit keys derived from PBKDF2 for Authenticated Encryption.
 
-<h3>Encrypt files at your own risk, if you lose your keys AND your original file, they will be irrecoverable!</h3>
+### Encrypt files at your own risk, if you lose your keys AND your original file, they will be irrecoverable!</h3>
 Multiple keys can be stored securely using the keyring(.kring files), which automatically manage keys.
 
 Multiple keyrings can be used on a single system. To specify a particular keyfile for the current session, use the config.json files.
