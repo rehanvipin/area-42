@@ -69,12 +69,13 @@ class Keyring(object):
             self.pk_data = cip.decrypt_and_verify(ct, tag)
             self.keys = pickle.loads(self.pk_data)
         except (KeyError,ValueError) as e:
-            print("Invalid data for decryption")
+            print("Invalid data for decryption or password incorrect")
 
 
-    def load(self, file_name):
-        self.file_name = file_name
-        with open(file_name, 'rb') as red:
+    def load(self, file_name = None):
+        if file_name:
+            self.file_name = file_name
+        with open(self.file_name, 'rb') as red:
             self.enc_data = red.read()
         # ToDo: Decrypt and convert to pickle format
         
@@ -89,8 +90,8 @@ class Keyring(object):
             print("Encrypt data first")
 
 
-    def create(self, password):
-        self.file_name = "new.kring"
+    def create(self, password, fname):
+        self.file_name = fname
         self.keys = {}
         self.pk_data = pickle.dumps(self.keys)
         self.encrypt(password)
@@ -110,11 +111,9 @@ class Keyring(object):
         else:
             self.keys[key_obj.bsh] = key_obj
 
-    def export_key(self, bsh):
-        if not self.keys.get(bsh, None):
-            return print("That key doesn't exist")
-        else:
-            return self.keys[bsh]
+
+    def purge(self):
+        self.data = None
 
 if __name__ == "__main__":
     hope = Keyring()
