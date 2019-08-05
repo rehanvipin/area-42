@@ -17,6 +17,8 @@ def gen_key(temp):
     if password != repeat:
         return print("Passwords do not match")
     fname = input(f"New keyring location (deafult: {os.curdir}/ufo.kring): ")
+    if not fname:
+        fname = os.path.join(os.curdir, 'ufo.kring')
 
     kring = keyring.Keyring()
     try:
@@ -41,7 +43,10 @@ def decrypt(fil, kring):
     if not key:
         print("Cannot decrypt file, Key not found")
         return fil.close()
-    cip.decrypt(key)
+    try:
+        cip.decrypt(key)
+    except (ValueError, KeyError) as e:
+        print("Cannot decrypt file", fil.name, "Corrupt data")
 
 
 def main():
@@ -77,7 +82,7 @@ def main():
             raise ValueError('Cannot find specified keyring, Use --gen to generate one')
         elif not path:
             print("Enter a kfile name using the --kfile option")
-        stats['kring'] = path
+        stats['kring'] = os.path.join(os.curdir, path)
         stats['used'] = 0
 
         if parsed.temp:
@@ -134,6 +139,7 @@ def main():
                 fil = open(msg, 'rb')
                 decrypt(fil, kring)
             finally:
+                print("Cannot decrypt ",fil.name)
                 fil.close()
             stats['used'] += 1
 

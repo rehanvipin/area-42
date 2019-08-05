@@ -31,11 +31,14 @@ class Cipher(object):
         key = rand(self.key_size)
         enc = AES.new(key, AES.MODE_GCM)
         ct, tag = enc.encrypt_and_digest(data)
+        del data # Saves memory
         nonce = pad(enc.nonce, self.nonce_pad)
         body = nonce + pad(tag, self.tag_pad) + ct
         hsh, bsh = self.shahash(body)
         with open(hsh+'.lckd','wb') as wir:
             wir.write(bsh + body)
+
+        del body
 
         # Creating the key object, doesn't save data to file
         key_obj = keys.Key()
@@ -48,7 +51,7 @@ class Cipher(object):
         """Decrypts the file and returns the plaintext needs key object as param"""
         bsh = self.file.read(32)
         if bsh != key_obj.bsh:
-            raise ValueError('Incorrect Data')
+            raise ValueError('Cannot Decrypt Incorrect Data')
 
         nonce = unpad(self.file.read(self.nonce_pad), self.nonce_pad)
         tag = unpad(self.file.read(self.tag_pad), self.tag_pad)
@@ -57,13 +60,15 @@ class Cipher(object):
         dec = AES.new(key_obj.key, AES.MODE_GCM, nonce=nonce)
         try:
             data = dec.decrypt_and_verify(ct, tag)
-        except ValueError as v:
-            print("Cannot decrypt, incorrect data")
-            return
+        finally:
+            self.file.close()
+        del ct # Saves memory
         data = unpad(data, self.block_size)
 
         with open(key_obj.file_name, 'wb') as wir:
             wir.write(data)
+
+        del data
 
     def shahash(self, inp, hexd = False):
         """Returns the SHA256 hash of the input object"""
