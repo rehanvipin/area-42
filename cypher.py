@@ -8,12 +8,13 @@ from Crypto.Hash import SHA256
 import keys
 
 class Cipher(object):
-    """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted"""
+    """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted\
+        Important: Hash length is 32 bytes, any use of 32 represents hash usage"""
 
     def __init__(self, file_object, func='e'):
         """Use func to specify whether encrypting or decrypting, expects an object\
                 pointing to the plaintext or the ciphertext"""
-        assert file_object.readable(), "Cannot read the file"
+        assert file_object.readable(), f"Cannot read the file {file_object.name}"
 
         self.file = file_object
         self.file_name = file_object.name
@@ -103,6 +104,7 @@ if __name__ == "__main__":
         else:
             print("Invalid argument")
     else:
+        print("Encrypting test.txt")
         test_encrypt('test.txt')
         # test_decrypt('lmao')
     print("Succesful")
