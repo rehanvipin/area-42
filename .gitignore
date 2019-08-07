@@ -1,5 +1,6 @@
 # The virtual environment for pycrypto and others
 crypt/
+blacks/
 __pycache__/
 Activate.ps1
 *test*
