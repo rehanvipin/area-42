@@ -2,6 +2,7 @@
 crypt/
 blacks/
 __pycache__/
+.idea/
 Activate.ps1
 *test*
 *.bak

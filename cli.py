@@ -60,7 +60,7 @@ def main():
     parsi.add_argument('-t','--temp', action='store_true', help='Use for temporary configuration')
     parsi.add_argument('--gen', action='store_true', help='Use to generate keyring')
     parsi.add_argument('--kfile', help='location of keyring file')
-    parsi.add_argument('--file', nargs='+', help='The location of file(s) to encrypt or to decrypt')
+    parsi.add_argument('file', nargs='*', help='The location of file(s) to encrypt or to decrypt')
     parsed = parsi.parse_args()
 
     # Set the configuration file 
@@ -138,8 +138,10 @@ def main():
             try:
                 fil = open(msg, 'rb')
                 decrypt(fil, kring)
-            finally:
+            except (KeyError, ValueError) as e:
+                print(e)
                 print("Cannot decrypt ",fil.name)
+            finally:
                 fil.close()
             stats['used'] += 1
 
