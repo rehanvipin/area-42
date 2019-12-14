@@ -5,6 +5,7 @@ __pycache__/
 .idea/
 Activate.ps1
 *test*
+*.png
 *.bak
 *.lckd
 *.key
