@@ -60,6 +60,8 @@ class Cipher(object):
         dec = AES.new(key_obj.key, AES.MODE_GCM, nonce=nonce)
         try:
             data = dec.decrypt_and_verify(ct, tag)
+        except (KeyError, ValueError) as e:
+            print("Cannot decrypt data")
         finally:
             self.file.close()
         del ct # Saves memory

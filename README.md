@@ -14,4 +14,4 @@ For installation, usage and FAQs look at the project wiki: [Wiki](https://github
 
 Please read the short license before using the software [LICENSE](https://github.com/rehanvipin/area-42/blob/master/LICENSE.md).
 
-All bugs and requests can be reported under the issues coloumn [Issues](https://github.com/rehanvipin/area-42/issues).
+All bugs and requests can be reported under the issues column [Issues](https://github.com/rehanvipin/area-42/issues).
