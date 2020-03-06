@@ -70,6 +70,7 @@ class Keyring(object):
             self.keys = pickle.loads(self.pk_data)
         except (KeyError,ValueError) as e:
             print("Invalid data for decryption or password incorrect")
+            exit(0)
 
 
     def load(self, file_name = None):

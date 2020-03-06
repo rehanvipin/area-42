@@ -71,8 +71,8 @@ def main():
 
     # The parser, to be used in cli as -> python cli.py --gen -ct -ed --kfile [kfile] [file]
     parsi = argparse.ArgumentParser()
-    parsi.add_argument('-c', '--config', action='store_true',
-                       help='specify the location of the config file')
+    # parsi.add_argument('-c', '--config', action='store_true',
+    #                    help='specify the location of the config file')
     parsi.add_argument('-e', '--encrypt', action='store_true',
                        help='Use to encrypt a file')
     parsi.add_argument('-d', '--decrypt', action='store_true',
@@ -81,13 +81,15 @@ def main():
                        help='Use for temporary configuration')
     parsi.add_argument('--gen', action='store_true',
                        help='Use to generate keyring')
+    parsi.add_argument('--gen_konf', action='store_true',
+                       help='Used to make a configuration file, will be placed in ~/area_config.json')
     parsi.add_argument('--kfile', help='location of keyring file')
     parsi.add_argument('file', nargs='*',
                        help='The location of file(s) to encrypt or to decrypt')
     parsed = parsi.parse_args()
 
-    if not any([parsed.config, parsed.encrypt, parsed.decrypt, parsed.temp, parsed.gen, parsed.kfile, \
-    	parsed.file]):
+    if not any([parsed.encrypt, parsed.decrypt, parsed.temp, parsed.gen, parsed.kfile, \
+    	parsed.gen_konf ,parsed.file]):
     	print(Usage)
 
     # Set the configuration file
@@ -103,24 +105,43 @@ def main():
     if parsed.gen:
         gen_key(temp)
         exit()
-
-    if parsed.config:
-        path = parsed.kfile
-        if path and not os.path.exists(path):
-            raise ValueError(
-                'Cannot find specified keyring, Use --gen to generate one')
-        elif not path:
-            print("Enter a kfile name using the --kfile option")
-        stats['kring'] = os.path.join(os.curdir, path)
-        stats['used'] = 0
-
-        if parsed.temp:
-            with open(temp_config_path, 'w') as wir:
-                json.dump(stats, wir)
-        else:
-            with open(home_config_path, 'w') as wir:
-                json.dump(stats, wir)
+    
+    if parsed.gen_konf:
+        usage_stat = 0
+        config_path = home_config_path
+        if temp:
+            config_path = temp_config_path
+        if os.path.exists(config_path):
+            print("Found a configuration file, updating it")
+            with open(config_path) as red:
+                temp_stats = json.load(red)
+                usage_stat = temp_stats["used"]
+        if not parsed.kfile:
+            print("Could not a find a key-file")
+            exit()
+        stats = {"kring":parsed.kfile, "used":usage_stat}
+        with open(config_path, "w") as wire:
+            json.dump(stats, wire)
+        print("Placed the configuration file in : ", config_path)
         exit()
+
+    # if parsed.config:
+    #     path = parsed.kfile
+    #     if path and not os.path.exists(path):
+    #         raise ValueError(
+    #             'Cannot find specified keyring, Use --gen to generate one')
+    #     elif not path:
+    #         print("Enter a kfile name using the --kfile option")
+    #     stats['kring'] = os.path.join(os.curdir, path)
+    #     stats['used'] = 0
+
+    #     if parsed.temp:
+    #         with open(temp_config_path, 'w') as wir:
+    #             json.dump(stats, wir)
+    #     else:
+    #         with open(home_config_path, 'w') as wir:
+    #             json.dump(stats, wir)
+    #     exit()
 
     ipfiles = parsed.file
     if not ipfiles:
