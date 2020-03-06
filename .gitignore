@@ -3,6 +3,9 @@ crypt/
 blacks/
 __pycache__/
 .idea/
+dev/
+vinci/
+./vscode
 Activate.ps1
 *test*
 *.png
