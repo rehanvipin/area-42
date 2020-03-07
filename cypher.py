@@ -48,7 +48,7 @@ class Cipher(object):
 
 
     def decrypt(self, key_obj):
-        """Decrypts the file and returns the plaintext needs key object as param"""
+        """Decrypts the file and saves the plaintext needs key object as param"""
         bsh = self.file.read(32)
         if bsh != key_obj.bsh:
             raise ValueError('Cannot Decrypt Incorrect Data')

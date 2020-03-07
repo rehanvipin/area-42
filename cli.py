@@ -9,23 +9,34 @@ import getpass
 
 import cypher
 import keyring
+import keys
 
 
-Usage = """usage: cli.py [-h] [-c] [-e] [-d] [-t] [--gen] [--kfile KFILE]
+Usage = """
+usage: cli.py [-h] [-e] [-d] [-t] [--gen] [--gen_konf] [--kfile KFILE]
+              [--export_key EXPORT_KEY] [--import_key IMPORT_KEY]
               [file [file ...]]
 
 positional arguments:
-  file           The location of file(s) to encrypt or to decrypt
+  file                  The location of file(s) to encrypt or to decrypt
 
 optional arguments:
-  -h, --help     show this help message and exit
-  -c, --config   specify the location of the config file
-  -e, --encrypt  Use to encrypt a file
-  -d, --decrypt  Use to decrypt a file, Need to specify the config first
-  -t, --temp     Use for temporary configuration
-  --gen          Use to generate keyring
-  --kfile KFILE  location of keyring file
-  """
+  -h, --help            show this help message and exit
+  -e, --encrypt         Use to encrypt a file
+  -d, --decrypt         Use to decrypt a file, Need to specify the config
+                        first
+  -t, --temp            Use for temporary configuration
+  --gen                 Use to generate keyring
+  --gen_konf            Used to make a configuration file, will be placed in
+                        ~/area_config.json
+  --kfile KFILE         location of keyring file
+  --export_key EXPORT_KEY
+                        Export the key for an encrypted input file, given the
+                        password
+  --import_key IMPORT_KEY
+                        Import a key, given the key-file, into the keyring,
+                        need the keyring password
+"""
 
 
 def gen_key(temp):
@@ -84,12 +95,16 @@ def main():
     parsi.add_argument('--gen_konf', action='store_true',
                        help='Used to make a configuration file, will be placed in ~/area_config.json')
     parsi.add_argument('--kfile', help='location of keyring file')
+    parsi.add_argument('--export_key', 
+    help='Export the key for an encrypted input file, given the password')
+    parsi.add_argument('--import_key',
+    help='Import a key, given the key-file, into the keyring, need the keyring password')
     parsi.add_argument('file', nargs='*',
                        help='The location of file(s) to encrypt or to decrypt')
     parsed = parsi.parse_args()
 
     if not any([parsed.encrypt, parsed.decrypt, parsed.temp, parsed.gen, parsed.kfile, \
-    	parsed.gen_konf ,parsed.file]):
+    	parsed.gen_konf ,parsed.file, parsed.export_key, parsed.import_key]):
     	print(Usage)
 
     # Set the configuration file
@@ -124,6 +139,55 @@ def main():
             json.dump(stats, wire)
         print("Placed the configuration file in : ", config_path)
         exit()
+    
+    # Get the kring for all further actions
+    if temp:
+        with open(temp_config_path, 'r') as red:
+            stats = json.load(red)
+    else:
+        with open(home_config_path, 'r') as red:
+            stats = json.load(red)
+    
+    if parsed.export_key:
+        #Get the keyring ready for the operations
+        password = getpass.getpass(
+            prompt="Enter master password: ", stream=None)
+        kring = keyring.Keyring(stats['kring'])
+        kring.load()
+        kring.decrypt(password)
+
+        # The parsed.export_key will be a file-name, of an encrypted file
+        # Need to get the hash from it, search if it exists and
+        # if it does export the key from the keyring
+        with open(parsed.export_key, "rb") as red:
+            bsh = red.read(32)
+        #Got the binary hash, now to search with it
+        key_to_export = kring.search_key(bsh)
+        if not key_to_export:
+            print("Could not find the key for this file in your keyring")
+            exit()
+        key_file_name = parsed.export_key+".key"
+        key_to_export.save(key_file_name)
+
+        print("Saved the key to the current directory")
+        exit()
+    
+    if parsed.import_key:
+        #Get the keyring ready for the operations
+        password = getpass.getpass(
+            prompt="Enter master password: ", stream=None)
+        kring = keyring.Keyring(stats['kring'])
+        kring.load()
+        kring.decrypt(password)
+
+        # Getting the key and adding it to the key-ring
+        # Thank previous self for making these nice functions
+        key_to_import = keys.Key(parsed.import_key, 'd')
+        kring.import_key(key_to_import)
+        kring.encrypt(password)
+        kring.save()
+        print("Added the key to the keyring")
+        exit()
 
     # if parsed.config:
     #     path = parsed.kfile
@@ -146,18 +210,20 @@ def main():
     ipfiles = parsed.file
     if not ipfiles:
         exit()
+
+    # Now need to get files and encrypt them
+    # dirs = True
+    # direcs = []
+    # files = ipfiles
+    # while dirs:
+    #     for ifile in files:
+    #         if os._isdir(ifile):
+    #             direcs.append(ifile)
+
     faults = list(filter(lambda x: not os.path.exists(x), ipfiles))
     if faults:
         print("Cannot find the following files: ", *faults)
         exit()
-
-    # Get the kring for all further actions
-    if temp:
-        with open(temp_config_path, 'r') as red:
-            stats = json.load(red)
-    else:
-        with open(home_config_path, 'r') as red:
-            stats = json.load(red)
 
     if parsed.encrypt:
         password = getpass.getpass(
