@@ -7,9 +7,9 @@ import json
 import getpass
 
 
-from . import cypher
-from . import keyring
-from . import keys
+import cypher
+import keyring
+import keys
 
 
 Usage = """

@@ -5,7 +5,7 @@ from Crypto.Random import get_random_bytes as rand
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Hash import SHA256
 
-from . import keys
+import keys
 
 class Cipher(object):
     """Cipher class to encrypt and decrypt data, Expects data to be correctly formatted\
