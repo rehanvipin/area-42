@@ -189,28 +189,12 @@ def main():
         print("Added the key to the keyring")
         exit()
 
-    # if parsed.config:
-    #     path = parsed.kfile
-    #     if path and not os.path.exists(path):
-    #         raise ValueError(
-    #             'Cannot find specified keyring, Use --gen to generate one')
-    #     elif not path:
-    #         print("Enter a kfile name using the --kfile option")
-    #     stats['kring'] = os.path.join(os.curdir, path)
-    #     stats['used'] = 0
-
-    #     if parsed.temp:
-    #         with open(temp_config_path, 'w') as wir:
-    #             json.dump(stats, wir)
-    #     else:
-    #         with open(home_config_path, 'w') as wir:
-    #             json.dump(stats, wir)
-    #     exit()
-
     ipfiles = parsed.file
     if not ipfiles:
         exit()
 
+    # Could add the directory traversal part here or make a new
+    # function entirely, store them in a list perhaps?
     # Now need to get files and encrypt them
     # dirs = True
     # direcs = []
@@ -220,20 +204,24 @@ def main():
     #         if os._isdir(ifile):
     #             direcs.append(ifile)
 
+    # Checks if all the files passed as inputs are valid
+
     faults = list(filter(lambda x: not os.path.exists(x), ipfiles))
     if faults:
         print("Cannot find the following files: ", *faults)
         exit()
+    
 
+    # Encrypts the input files, works when the keyring is valid
     if parsed.encrypt:
         password = getpass.getpass(
             prompt="Enter master password: ", stream=None)
         kring = keyring.Keyring(stats['kring'])
         kring.load()
         kring.decrypt(password)
-        for msg in ipfiles:
+        for file_name in ipfiles:
             try:
-                fil = open(msg, 'rb')
+                fil = open(file_name, 'rb')
                 encrypt(fil, kring)
             finally:
                 fil.close()
@@ -243,7 +231,9 @@ def main():
         kring.save()
 
         del kring
+    
 
+    # Decrypts the input files, breaks if the output files are not encrypted as expected
     if parsed.decrypt:
         password = getpass.getpass(
             prompt="Enter master password: ", stream=None)

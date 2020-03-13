@@ -69,7 +69,7 @@ class Keyring(object):
             self.pk_data = cip.decrypt_and_verify(ct, tag)
             self.keys = pickle.loads(self.pk_data)
         except (KeyError,ValueError) as e:
-            print("Invalid data for decryption or password incorrect")
+            print("Invalid data for decryption or password incorrect"+e)
             exit(0)
 
 
