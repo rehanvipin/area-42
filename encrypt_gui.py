@@ -1,1 +1,3 @@
-from core import cli
+import cli
+
+import kivy
