@@ -9,6 +9,7 @@ class Key(object):
         """ fname is used to load data from the keyfile, only for decryption """
         # mode e does nothing, only for description
         self.filename_len = 64
+        # Using mode e is for setting up the vars to be loaded later
         if mode=='e':
             self.key = b''
             # bsh is the hash in bytes form hsh is in hex format
@@ -19,9 +20,15 @@ class Key(object):
             # file_name is the original name of the big file
             self.file_name = ''
         elif mode=='d':
-            # while using decryption, entire filename is provided
+            # while using decryption, entire filename is provided, it loads in the full key
             if os.path.exists(os.curdir + '/' +fname):
-                self.load(fname)
+                try:
+                    self.load(fname)
+                except:
+                    print("Malformed key-file")
+                    exit()
+            else:
+                raise ValueError("Could not find such a key-file")
         #Else simply create the object, without any params
 
     def __repr__(self):

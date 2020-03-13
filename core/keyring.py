@@ -14,7 +14,7 @@ from Crypto.Random import get_random_bytes as rand
 from Crypto.Util.Padding import pad, unpad
 
 
-import keys
+from . import keys
 
 class Keyring(object):
     """An encrypted object to contain multiple keys, Enc data is stored in the format\
@@ -70,6 +70,7 @@ class Keyring(object):
             self.keys = pickle.loads(self.pk_data)
         except (KeyError,ValueError) as e:
             print("Invalid data for decryption or password incorrect")
+            exit(0)
 
 
     def load(self, file_name = None):
